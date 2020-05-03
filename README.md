@@ -101,7 +101,7 @@ mpirun -np 4 rosetta_scripts.mpi.macosclangrelease @refine.flags -nstruct 100
 
 
 
-### 3 单点突变扫描
+### 4 单点突变扫描
 
 ```shell
 mpirun -np 4 rosetta_scripts.mpi.macosclangrelease @filterscan.flags
@@ -152,7 +152,7 @@ rosetta_scripts.mpi.macosclangrelease @mutate.flags -out:suffix _0000 -parser:sc
 
 
 
-## 结语
+## 三、结语
 
 Funclib的计算方法是默认不放置目标底物分子的，因此构建出的是一个非特异性的酶序列库。如果催化的小分子目标明确，并且与晶体结构中的底物分子有共同的母核，就可以有针对性地进行设计酶活中心。这种情况可以跑两轮Funclib，第一轮就是为了塞进目标底物，首先通过比对，将新的底物分子放置在酶活中心区域，并执行序列搜索，找到能够兼容新底物的基本口袋形状。将第一轮中能量最低的结构作为第二轮的输入，开始真正设计酶库，最后实验验证筛选。
 
