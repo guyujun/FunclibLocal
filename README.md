@@ -30,7 +30,7 @@
 
 以下将介绍如何使用RosettaScript来使用Funclib的方法。
 
-**本文所有的脚本均在github可下载，github地址: xxxxxx待补充。**
+**本文所有的脚本均在github可下载，github地址:https://github.com/guyujun/FunclibLocal。**
 
 **本方法不需要额外处理辅酶分子，所有保留在pdb中的底物均会被保留。**
 
