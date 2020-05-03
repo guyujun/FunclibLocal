@@ -1,0 +1,50 @@
+<ROSETTASCRIPTS>
+
+  <SCOREFXNS>
+  <ScoreFunction name="scorefxn_full" weights="ref2015">
+  <Reweight scoretype="coordinate_constraint" weight="0.1"/>
+  <Reweight scoretype="res_type_constraint" weight="0.1"/>
+  </ScoreFunction>
+  </SCOREFXNS>
+
+  <RESIDUE_SELECTORS>
+    <Index name="ress_fix" resnums="%%res_to_fix%%"/>
+  </RESIDUE_SELECTORS>
+
+  <TASKOPERATIONS>
+    <InitializeFromCommandline name="init"/>
+    <DesignAround name="des_around" design_shell="0.1" resnums="%%current_res%%" repack_shell="8.0"/>
+    <SeqprofConsensus name="pssm_cutoff" filename="%%pssm_full_path%%" min_aa_probability="-2" probability_larger_than_current="0" convert_scores_to_probabilities="0" keep_native="1" debug="1" ignore_pose_profile_length_mismatch="0"/>
+    <OperateOnResidueSubset name="fix_res" selector="ress_fix">
+      <PreventRepackingRLT/>
+    </OperateOnResidueSubset>
+    <OperateOnResidueSubset name="not_to_cst_sc">
+      <Not selector="ress_fix"/>
+    <PreventRepackingRLT/>
+    </OperateOnResidueSubset>
+  </TASKOPERATIONS>
+
+  <MOVERS>
+    <AtomCoordinateCstMover name="fix_res_sc_cst" coord_dev="0.5" bounded="false" sidechain="true" task_operations="not_to_cst_sc"/>
+    <ConstraintSetMover name="add_CA_cst" cst_file="%%cst_full_path%%"/>
+    <FavorSequenceProfile name="FSP" scaling="none" weight="1" pssm="%%pssm_full_path%%" scorefxns="scorefxn_full" />
+    <MinMover name="min_all" scorefxn="scorefxn_full" chi="1" bb="1" jump="0"/>
+  </MOVERS>
+
+  <FILTERS>
+    <ScoreType name="stability_score_full" scorefxn="scorefxn_full" score_type="total_score" threshold="0.0"/>
+    <Delta name="delta_score_full" filter="stability_score_full" upper="1" lower="0" range="0.5"/>
+    <FilterScan name="filter_scan" scorefxn="scorefxn_full" relax_mover="min_all" keep_native="1" task_operations="init,des_around,pssm_cutoff,fix_res" delta_filters="delta_score_full" delta="true" resfile_name="resfiles/res_%%current_res%%" report_all="1" delta_filter_thresholds="0.0,0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0" score_log_file="scores/res%%current_res%%_score_full.log" dump_pdb="0"/>
+  </FILTERS>
+
+  <PROTOCOLS>
+    <Add mover_name="add_CA_cst"/>
+    <Add mover_name="fix_res_sc_cst"/>
+    <Add mover="FSP"/>
+    <Add filter="filter_scan"/>
+  </PROTOCOLS>
+
+  <OUTPUT scorefxn="scorefxn_full"/>
+
+</ROSETTASCRIPTS>
+

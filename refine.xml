@@ -1,0 +1,82 @@
+<ROSETTASCRIPTS>
+
+  <SCOREFXNS>
+    <ScoreFunction name="ref_full" weights="ref2015">
+      <Reweight scoretype="coordinate_constraint" weight="0.1"/>
+      <Reweight scoretype="res_type_constraint" weight="0.1"/>
+    </ScoreFunction>
+    <ScoreFunction name="soft_rep_full" weights="soft_rep">
+      <Reweight scoretype="coordinate_constraint" weight="0.1"/>
+      <Reweight scoretype="res_type_constraint" weight="0.1"/>
+    </ScoreFunction>
+    <ScoreFunction name="ref_no_pssm" weights="ref2015">
+      <Reweight scoretype="coordinate_constraint" weight="0.1"/>
+    </ScoreFunction>
+    <ScoreFunction name="ref_pure" weights="ref2015"/>
+  </SCOREFXNS>
+
+  <RESIDUE_SELECTORS>
+    <Index name="ress_fix" resnums="%%res_to_fix%%"/>
+  </RESIDUE_SELECTORS>
+
+  <TASKOPERATIONS>
+    <InitializeFromCommandline name="init"/>
+    <RestrictToRepacking name="rtr"/>
+    <OperateOnResidueSubset name="fix_res" selector="ress_fix">
+      <PreventRepackingRLT/>
+    </OperateOnResidueSubset>
+    <OperateOnResidueSubset name="not_to_cst_sc">
+      <Not selector="ress_fix"/>
+      <PreventRepackingRLT/>
+    </OperateOnResidueSubset>
+  </TASKOPERATIONS>
+
+  <MOVERS>
+    <AtomCoordinateCstMover name="fix_res_sc_cst" coord_dev="0.5" bounded="false" sidechain="true" task_operations="not_to_cst_sc"/>
+    <PackRotamersMover name="soft_repack" scorefxn="soft_rep_full" task_operations="init,rtr,fix_res"/>
+    <PackRotamersMover name="hard_repack" scorefxn="ref_full" task_operations="init,rtr,fix_res"/>
+    <RotamerTrialsMinMover name="RTmin" scorefxn="ref_full" task_operations="init,rtr,fix_res"/>
+    <TaskAwareMinMover name="soft_min" scorefxn="soft_rep_full" chi="1" bb="1" jump="0" task_operations="init,fix_res"/>
+    <TaskAwareMinMover name="hard_min" scorefxn="ref_full" chi="1" bb="1" jump="0" task_operations="init,fix_res"/>
+    <ConstraintSetMover name="add_CA_cst" cst_file="%%cst_full_path%%"/>
+
+    <ParsedProtocol name="refinement_block">
+      <Add mover_name="soft_repack"/>
+      <Add mover_name="soft_min"/>
+      <Add mover_name="soft_repack"/>
+      <Add mover_name="hard_min"/>
+      <Add mover_name="hard_repack"/>
+      <Add mover_name="hard_min"/>
+      <Add mover_name="hard_repack"/>
+      <Add mover_name="RTmin"/>
+      <Add mover_name="RTmin"/>
+      <Add mover_name="hard_min"/>
+    </ParsedProtocol>
+
+    <LoopOver name="iter4" mover_name="refinement_block" iterations="4"/>
+  </MOVERS>
+
+  <FILTERS>
+    <ScoreType name="stability_score_full" scorefxn="ref_full" score_type="total_score" confidence="0" threshold="0"/>
+    <ScoreType name="stability_without_pssm" scorefxn="ref_no_pssm" score_type="total_score" confidence="0" threshold="0"/>
+    <ScoreType name="stability_pure" scorefxn="ref_pure" score_type="total_score" confidence="0" threshold="0"/>
+    <Rmsd name="rmsd" confidence="0"/>
+    <Time name="timer"/>
+  </FILTERS>
+
+  <PROTOCOLS>
+    <Add filter_name="timer"/>
+    <Add mover_name="add_CA_cst"/>
+    <Add mover_name="fix_res_sc_cst"/>
+    <Add mover_name="iter4"/>
+    <Add filter_name="stability_score_full"/>
+    <Add filter_name="stability_without_pssm"/>
+    <Add filter_name="stability_pure"/>
+    <Add filter_name="rmsd"/>
+    <Add filter_name="timer"/>
+  </PROTOCOLS>
+  
+  <OUTPUT scorefxn="ref_full"/>
+
+</ROSETTASCRIPTS>
+
