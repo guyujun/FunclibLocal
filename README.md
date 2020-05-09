@@ -22,7 +22,9 @@
 
 本文中介绍的Funclib的开发思路是继承PROSS的核心思想，首先利用PSSM信息以及单点突变预测信息，将备选的序列空间大大降低，再进行序列的组合design，比起通常Rosetta中的全序列空间的模拟退火寻找近优解来说，通过穷举法搜索序列空间可以挖掘地更深。Funclib流程只考虑酶底物结合口袋附近的位点，并约束关键的活性侧链以及离子构象，可以将序列采样空间缩小到可以穷举的范围（几万），通过softrepack，repack，rotmin等常用mover结合，可以在几十秒内完成一个突变体的打分。
 
-将可耐受的突变获取作为候选突变类型（如PSSM>=-2, ddG<=5的单点突变），再对所有的位点进行穷举组合（至少3个突变，最多5-6个突变）计算ddG。最后通过再对所有结果进行排序和聚类得到突变体的建议。文章中他们展示了该方法可以成功的扩展若干模式酶的底物选择性。
+将可耐受的突变获取作为候选突变类型（如PSSM>=-2, ddG<=5的单点突变），再对所有的位点进行穷举组合（至少3个突变，最多5-6个突变）计算ddG。最后通过再对所有结果进行排序和聚类得到突变体的建议。文章中他们展示了该方法可以成功的扩展若干模式酶的底物选择性。![funclib原理](/Users/kunkun/Library/Mobile Documents/com~apple~CloudDocs/markdown/图片/funclib/funclib原理.png)
+
+
 
 
 
@@ -32,7 +34,7 @@
 
 **本文所有的脚本均在github可下载，github地址:https://github.com/guyujun/FunclibLocal。**
 
-**本方法不需要额外处理辅酶分子，所有保留在pdb中的底物均会被保留。**
+**本方法不需要额外处理辅酶分子，所有在pdb中的底物、金属离子均会被保留。**
 
 
 
@@ -95,9 +97,7 @@ mpirun -np 4 rosetta_scripts.mpi.macosclangrelease @refine.flags -nstruct 100
 
 输出的文件结果均在refinement文件夹中。
 
-最终需要获取一个最优化的结构，该步骤可以重复多次（x10）取能量最小的一个。
-
-**并将这个结构重命名为lowest_energy.pdb。**
+最终需要获取一个最优化的结构，**并将这个结构重命名为lowest_energy.pdb。**
 
 
 
