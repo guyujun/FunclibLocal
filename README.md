@@ -101,10 +101,10 @@ mpirun -np 4 rosetta_scripts.mpi.macosclangrelease @refine.flags -nstruct 100
 
 
 
-### 4 单点突变扫描
+### 4 单点突变扫描（单进程）
 
 ```shell
-mpirun -np 4 rosetta_scripts.mpi.macosclangrelease @filterscan.flags
+rosetta_scripts.mpi.macosclangrelease @filterscan.flags
 ```
 
 该过程会遍历计算每种突变类型的ddG值，结果会保存在resfiles文件夹的每个resfile中，不同的cutoff存到不同的文件里。可以根据需要修改resfile。
